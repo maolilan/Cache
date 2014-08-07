@@ -1,11 +1,14 @@
-#include "cache.h"
+#include "cache.h" 
+#include "utility.h"
+
+extern vector<vector<int>> DB;
 
 /* Implement O(1) access LFU cache, using two types of node, frequency node and list node,
    refer to paper: An O(1) algorithm for implementing the LFU cache eviction scheme
    Prof. Ketan Shah Anirban Mitra Dhruv Matani, August 16, 2010 */
 
 /* put a new node in frequecy 1 queue, and update the hash table */
-void LFUCache:PutNode(int frameid, int value) {
+void LFUCache::PutNode(int frameid, int value) {
     LFUListNode* listnode = new LFUListNode(frameid, value);
     if(!Free)
         DeleteNode();
@@ -24,16 +27,16 @@ void LFUCache:PutNode(int frameid, int value) {
         }
         /* case 3: if Head->next is the frequency 1 node*/
         else
-	    InsertNode(listnode, FreqHead->next);
+	    InsertNode(listnode, FreqHead->Next);
 	    
 	/* insert to hash table */
-	LFUHash.insert<frameid, listnode>;
+	LFUHash.insert({frameid, listnode});
 	Free++;
 	return;
 }
     
 /* get the frame from the existing cache, return NULL if it is missing */
-bool LFUCache:GetNode(int frameid, int& result) {
+bool LFUCache::GetNode(int frameid, int& result) {
     /* if hit some node*/
     if (LFUHash.find(frameid)!=LFUHash.end()) {
         /* update the cache */
@@ -51,22 +54,22 @@ bool LFUCache:GetNode(int frameid, int& result) {
 }
 
 /* Delete the least frequency node */
-void LFUCache:DeleteNode(){
+void LFUCache::DeleteNode(){
     if(!FreqHead->Next)
 	return;
     else {
     	LFUListNode* listnode = FreqHead->Next->HeadNode;
     	IsolateNode(listnode);
     	delete(LFUHash[listnode->FrameID]);
-    	delete(listnode);
-    	LFUHash.erase(frameid);
+    	LFUHash.erase(listnode->FrameID);
+    	delete(listnode);  	
     	Free--;
     }
     return;
 }
 
 /* update node to next frequency */
-void LFUCache:UpdateNode(LFUListNode*& listnode) {
+void LFUCache::UpdateNode(LFUListNode*& listnode) {
 	FreqNode* freqnode = listnode->FreqNodeQ; /* current frequency node */
         int frequency = freqnode->Freq; /* current frequency */
         
@@ -99,7 +102,7 @@ void LFUCache:UpdateNode(LFUListNode*& listnode) {
 
 
 /* insert the listnode into frequency queque */
-void LFUCache:InsertNode(LFUListNode*& listnode, FreqNode*& freqnode) {
+void LFUCache::InsertNode(LFUListNode*& listnode, FreqNode*& freqnode) {
     /*case 1: if freqnode queue is empty */
     if (!freqnode->HeadNode) {
 	freqnode->HeadNode = listnode;
@@ -122,7 +125,7 @@ void LFUCache:InsertNode(LFUListNode*& listnode, FreqNode*& freqnode) {
    return the current frequence node if the queue is not empty,
    otherwise, delete the current frequence node, and return the previous frequence node */
 
-FreqNode* LFUCache:IsolateNode(LFUListNode*& listnode) {
+FreqNode* LFUCache::IsolateNode(LFUListNode*& listnode) {
 
     FreqNode* result = listnode->FreqNodeQ;
     
