@@ -1,60 +1,88 @@
 #include <vector>
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <string>
 
 
 Class ListNode {
-    int frameID;
-    int freq;
-    int value;
-    ListNode* next;
-    ListNode* prev;
-    ListNode(int x, int y, int value_t) {
-	frameID = x;
-	freq = y;
-	next = null;
-	prev = null;
-	value = value_t;
+    public:
+        int FrameID;
+        int Value;
+        ListNode* Next;
+        ListNode* Prev;
+        ListNode(int x, int y) {
+	    FrameID = x;
+	    Value = y;
+	    Next = NULL;
+	    Prev = NULL;
+        }
 };
 
-Class Cache {
-    int capacity;
-    int free;
-    ListNode* head;
-    ListNode* end;
-    unordered_map<int, ListNode*> Hash;
+Class LRUListNode:ListNode {
+	
+};
 
-    Cache(int x): capacity(x),free(x),head(null){}
-    void Put(int FrameID, int value_t){}=0;
-    bool Get(int FrameID, int& result){}=0;
-}
-
-Class LRUCache:Cache {
-
-}
-
+Class LFUListNode:ListNode {
+    public:
+        FreqNode* FreqNode;
+        LFUListNode(int x, int y) {
+    	    FrameID = x;
+    	    Value = y;
+    	    Next = NULL;
+    	    Prev = NULL;
+    	    FreqNode = NULL;
+        }
+};
 
 Class FreqNode {
-    int freq;
-    FreqNode* next;
-    FreqNode* prev;
-    LFUListNode* head;
-    //LFUListNode* tail;    
-}
+    public:
+        int Freq;
+        FreqNode* Next;
+        FreqNode* Prev;
+        LFUListNode* HeadNode;
+        //LFUListNode* tail;    
+};
 
 
-Class LFUListNode {
-    int frameID;
-    int value;
-    FreqNode* freq_node;
-    LFUListNode* next;
-    LFUListNode* prev; 
+Class Cache {
+    public:
+        int Capacity;
+        int Free;
+        unordered_map<int, ListNode*> Hash;
+
+        Cache(int x): Capacity(x),Free(x){}
+        void PutNode(int FrameID, int value_t){}=0;
+        bool GetNode(int FrameID, int& result){}=0;
+};
+
+Class LRUCache:Cache {
+    public:
+        LRUListNode* Head;
+        LRUListNode* End;
+        unordered_map<int, LRUListNode*> LRUHash;
     
-}
+        LRUCache(int x) {
+    	    Capacity = x;
+    	    Free = x;
+    	    Head = NULL;
+    	    End = NULL;
+        }
+};
+
 
 Class LFUCache:Cache {
-    unordered_map<int, LFUListNode*> Hash;
-    FreqNode* Head;
+    public:
+        unordered_map<int, LFUListNode*> LFUHash;
+        FreqNode* FreqHead;
     
-}
+        LFUCache(int x) {
+    	    Capacity = x;
+    	    Free = x;
+    	    FreqHead = NULL;
+        }
+     private:
+         void DeleteNode();
+         void UpdateNode(LFUListNode*& listnode);
+         void InsertNode(LFUListNode*& listnode, FreqNode*& freqnode);
+         FreqNode* IsolateNode(LFUListNode*& listnode);
+};
