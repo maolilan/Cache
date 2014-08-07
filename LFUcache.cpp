@@ -4,19 +4,6 @@ include "cache.h"
    refer to paper: An O(1) algorithm for implementing the LFU cache eviction scheme
    Prof. Ketan Shah Anirban Mitra Dhruv Matani, August 16, 2010 */
 
-/* Delete the least frequency node */
-void DeleteNode(){
-    if(!Head->next)
-	return;
-    else {
-    	LFUListNode* listnode = Head->next->head;
-    	IsolateNode(listnode);
-    	delete(Hash[listnode->frameid]);
-    	delete(listnode);
-    	Hash.erase(frameid);
-    	Free--;
-    }
-}
 /* put a new node in frequecy 1 queue, and update the hash table */
 void PutNode(int FrameID, int value_t) {
     LFUListNode* listnode = new LFUListNode(FrameID, value_t);
@@ -38,6 +25,9 @@ void PutNode(int FrameID, int value_t) {
         /* case 3: if Head->next is the frequency 1 node*/
         else
 	    InsertNode(listnode, Head->next);
+	    
+	/* insert to hash table */
+	Hash.insert<FrameID, listnode>;
 	Free++;
 	return;
 }
@@ -54,8 +44,24 @@ bool LFUCache:GetNode(int FrameID, int& result) {
     }
 
     /* if not hit any node */
-    else
-        PutNode(list_temp);
+    else {
+        PutNode(FrameID, DB[FrameID][2]);
+        return false;
+    }
+}
+
+/* Delete the least frequency node */
+void DeleteNode(){
+    if(!Head->next)
+	return;
+    else {
+    	LFUListNode* listnode = Head->next->head;
+    	IsolateNode(listnode);
+    	delete(Hash[listnode->frameid]);
+    	delete(listnode);
+    	Hash.erase(frameid);
+    	Free--;
+    }
 }
 
 /* update node to next frequency */
@@ -65,7 +71,7 @@ void LFUCache:UpdateNode(LFUListNode*& listnode) {
         
         /* if listnode is the node node in current frequency queue, PrevFreq
         is the previous frequency node, otherwise, is the current one. */
-        FreqNode* PrevFreq = DeleteNode(listnode); 
+        FreqNode* PrevFreq = IsolateNode(listnode); 
         FreqNode* NextFreq;
 
         /* case 1, the next FreqNode is null */
@@ -109,13 +115,12 @@ void LFUCache:InsertNode(LFUListNode*& listnode, FreqNode*& freqnode) {
 }
 
 
-
-/* delete the list node in the current frequence queue, the input listnode
-   will be clean, i.e. next, prev, freq_node are reset to be null
+/* isolate the node, i.e. delete the list node in the current frequence queue, 
+   the input listnode will be clean, i.e. next, prev, freq_node are reset to be null
    return the current frequence node if the queue is not empty,
    otherwise, delete the current frequence node, and return the previous frequence node */
 
-FreqNode* LFUCache:DeleteNode(LFUListNode*& listnode) {
+FreqNode* LFUCache:IsolateNode(LFUListNode*& listnode) {
 
     FreqNode* result = listnode->freq_node;
     
