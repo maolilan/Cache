@@ -1,5 +1,9 @@
 include "cache.h"
 
+/* Implement O(1) access LFU cache, using two types of node, frequency node and list node,
+   refer to paper: An O(1) algorithm for implementing the LFU cache eviction scheme
+   Prof. Ketan Shah Anirban Mitra Dhruv Matani, August 16, 2010 */
+
 //get the frame from the existing cache, return NULL if it is missing
 bool LFUCache:Get(int FrameID, int& result) {
     
@@ -120,6 +124,26 @@ FreqNode* LFUCache:DeleteNode(LFUListNode*& listnode) {
     
     /* case 2, this is not the only node */
     else {
-	
+    	/* listnode is at the end */
+	if(!listnode->next) {
+		listnode->prev->next = null;
+		listnode->prev = null;
+		listnode->freq_node = null;
+	}
+	/* listnode is at the head */
+	else if (!listnode->prev){
+		listnode->freq_node->head = listnode->next;
+		listnode->next->prev = null;
+		listnode->next = null;
+		listnode->freq_node = null
+	}
+	/* listnode is in the middle */
+	else{
+		listnode->prev->next = listnode->next;
+		listnode->next->prev = listnode->prev;
+		listnode->next = null;
+		listnode->prev = null;
+		listnode->freq_node = null;
+	}
     }
 }
