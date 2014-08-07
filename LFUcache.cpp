@@ -4,6 +4,60 @@ include "cache.h"
    refer to paper: An O(1) algorithm for implementing the LFU cache eviction scheme
    Prof. Ketan Shah Anirban Mitra Dhruv Matani, August 16, 2010 */
 
+/* Delete the least frequency node */
+void DeleteNode(){
+    if(!Head->next)
+	return;
+    else {
+    	LFUListNode* listnode = Head->next->head;
+    	IsolateNode(listnode);
+    	delete(Hash[listnode->frameid]);
+    	delete(listnode);
+    	Hash.erase(frameid);
+    	Free--;
+    }
+}
+/* put a new node in frequecy 1 queue, and update the hash table */
+void PutNode(int FrameID, int value_t) {
+    LFUListNode* listnode = new LFUListNode(FrameID, value_t);
+    if(!Free)
+        DeleteNode();
+
+    /* case 1: if Head is null || case 2: if Head->next is not the frequency 1 node*/
+    if(!(Head->next) || Head->next->freq != 1) {
+	FreqNode* NextFreq = new FreqNode(1);
+	/* connect frequency node */
+	if(Head->next) {
+	    NextFreq->next =  Head->next;
+	    Head->next->prev = NextFreq;
+	    }
+	Head->next = NextFreq;
+	NextFreq->prev = Head;
+	InsertNode(listnode, NextFreq);
+        }
+        /* case 3: if Head->next is the frequency 1 node*/
+        else
+	    InsertNode(listnode, Head->next);
+	Free++;
+	return;
+}
+    
+/* get the frame from the existing cache, return NULL if it is missing */
+bool LFUCache:GetNode(int FrameID, int& result) {
+    /* if hit some node*/
+    if (Hash.find(FrameId)!=Hash.end()) {
+        /* update the cache */
+        LFUListNode* list_temp = Hash[FrameId]; /* hit LFU list node */
+	UpdateNode(list_temp);
+	result = list_temp->value;
+	return true;
+    }
+
+    /* if not hit any node */
+    else
+        PutNode(list_temp);
+}
+
 /* update node to next frequency */
 void LFUCache:UpdateNode(LFUListNode*& listnode) {
 	FreqNode* freqnode = listnode->freq_node; /* current frequency node */
@@ -54,40 +108,6 @@ void LFUCache:InsertNode(LFUListNode*& listnode, FreqNode*& freqnode) {
 	
 }
 
-/* put a new node in frequecy 1 queue */
-PutNode(LFUListNode*& listnode) {
-    /* case 1: if Head is null || case 2: if Head->next is not the frequency 1 node*/
-    if(!(Head->next) || Head->next->freq != 1) {
-	FreqNode* NextFreq = new FreqNode(1);
-	/* connect frequency node */
-	if(Head->next) {
-	    NextFreq->next =  Head->next;
-	    Head->next->prev = NextFreq;
-	 }
-	 Head->next = NextFreq;
-	 NextFreq->prev = Head;
-	 InsertNode(listnode, NextFreq);
-    }
-    /* case 3: if Head->next is the frequency 1 node*/
-    else
-	InsertNode(listnode, Head->next);	    
-}
-    
-//get the frame from the existing cache, return NULL if it is missing
-bool LFUCache:GetNode(int FrameID, int& result) {
-    /* if hit some node*/
-    if (Hash.find(FrameId)!=Hash.end()) {
-        /* update the cache */
-        LFUListNode* list_temp = Hash[FrameId]; /* hit LFU list node */
-	UpdateNode(list_temp);
-	result = list_temp->value;
-	return true;
-    }
-
-    /* if not hit any node */
-    else
-        PutNode(list_temp);
-}
 
 
 /* delete the list node in the current frequence queue, the input listnode
