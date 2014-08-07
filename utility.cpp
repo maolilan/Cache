@@ -23,23 +23,35 @@ void initialize(vector<vector<int>>& A) {
     }
 }
 
+int Pattern1(int frameid) {
+	int num = random()%10;
+	if(num<8)
+	    return frameid;
+	else
+	    return random()%DBMax;
+}
 
-void Simulate(int count, int pattern, Cach* cache_obj) {
+void Simulate(int count, int pattern, Cache* cache_obj) {
     int hit = 0;
     int miss = 0;
     
     int frameid = random()%DBMax;
-    int value_t = 0;
+    int value = 0;
  
 
     for(int i=0; i<count; i++) {
-	if(Read(frameid, value_t, cache_obj)) 
+	if(Read(frameid, value, cache_obj)) 
 		hit++;
 	else
 		miss++;
-
-	frameid = pattern1(frameid);
+	switch(pattern) {
+	    case 1:
+		frameid = Pattern1(frameid);
+	    default:
+	        frameid = random()%DBMax;
+	}
     }
 
     cout << "The hitting/missing ratio is: " << hit/miss << endl;
+    return;
 }
