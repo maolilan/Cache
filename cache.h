@@ -24,7 +24,7 @@ Class LRUListNode:ListNode {
 
 Class LFUListNode:ListNode {
     public:
-        FreqNode* FreqNode;
+        FreqNode* FreqNodeQ;
         LFUListNode(int x, int y) {
     	    FrameID = x;
     	    Value = y;
