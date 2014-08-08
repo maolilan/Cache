@@ -13,12 +13,18 @@ void LRUCache::UpdateNode(LRUListNode*& listnode) {
     /* this is the tail */
     if(listnode == End);
     /* this is the head node */
-    else if(!listnode->Prev) {
-	Head = listnode->Next;
-	End->Next = listnode;
-	listnode->Prev = End;
-	listnode->Next = NULL;
-	End = listnode;
+    else if(listnode == Head) {
+    	if (!listnode->Prev) {
+	    Head = listnode->Next;
+	    End->Next = listnode;
+	    listnode->Prev = End;
+	    listnode->Next = NULL;
+	    End = listnode;
+    	}
+    	else {
+    	    Head = listnode->Next;
+    	    End = listnode;
+    	}
     }
     /* this is the middle node */
     else {
