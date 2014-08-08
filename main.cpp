@@ -9,9 +9,11 @@ vector<vector<int>> DB(DBMAX, vector<int>(3,0));
 
 int main() {
     initialize(DB);
-    LFUCache* lfucache = new LFUCache(CAPACITY);
+    //LFUCache* lfucache = new LFUCache(CAPACITY);
+    LRUCache* lrucache = new LRUCache(CAPACITY);
     int count = 100;
     int pattern = 1;
-    Simulate(count, pattern, lfucache); 
+    //SimulateLFU(count, pattern, lfucache); 
+    SimulateLRU(count, pattern, lrucache);
     return 0;
 }

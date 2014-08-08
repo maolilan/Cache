@@ -5,6 +5,8 @@
 #include <iostream>
 #include <unordered_map>
 #include <string>
+#include <time.h>
+
 using namespace std;
 
 class ListNode {
@@ -18,7 +20,7 @@ class LRUListNode:public ListNode {
     public:
 	LRUListNode* Prev;
 	LRUListNode* Next;
-        LFUListNode(int x, int y) {
+        LRUListNode(int x, int y) {
     	    FrameID = x;
     	    Value = y;
     	    Next = NULL;
@@ -79,8 +81,10 @@ class LRUCache:public Cache {
     	    Head = NULL;
     	    End = NULL;
         }
-    void PutNode(int frameid, int value);
-    bool GetNode(int frameid, int& result);
+        void PutNode(int frameid, int value);
+        bool GetNode(int frameid, int& result);
+    private:
+	void UpdateNode(LRUListNode*& listnode);
 };
 
 

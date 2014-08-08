@@ -10,5 +10,8 @@ bool Read(int frameid, int& result, Cache* cache_obj);
 void Write(int frameid, int x, int y);
 void initialize(vector<vector<int> >& A);
 int Pattern1(int frameid);
-void Simulate(int count, int pattern, Cache* cache_obj);
+void SimulateLFU(int count, int pattern, LFUCache* cache_obj);
+void SimulateLRU(int count, int pattern, LRUCache* cache_obj);
+void PrintLFUCacheStatus(LFUCache* lfucache);
+void PrintLRUCacheStatus(LRUCache* lrucache);
 #endif

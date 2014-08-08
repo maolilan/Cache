@@ -12,26 +12,29 @@ void LFUCache::PutNode(int frameid, int value) {
     LFUListNode* listnode = new LFUListNode(frameid, value);
     if(!Free)
         DeleteNode();
-
-    /* case 1: if Head is null || case 2: if Head->next is not the frequency 1 node*/
-    if(!(FreqHead->Next) || FreqHead->Next->Freq != 1) {
-	FreqNode* nextfreq = new FreqNode(1);
-	/* connect frequency node */
-	if(FreqHead->Next) {
-	    nextfreq->Next =  FreqHead->Next;
-	    FreqHead->Next->Prev = nextfreq;
+        
+    /* case 1: if Head->next is the frequency 1 node*/
+    if (FreqHead->Next && FreqHead->Next->Freq == 1) {
+		cout<<listnode<<endl;
+		InsertNode(listnode, FreqHead->Next);
+	}
+		
+    /* case 2: if Head is null || case 3: if Head->next is not the frequency 1 node*/
+    else {
+	    FreqNode* nextfreq = new FreqNode(1);
+	    /* connect frequency node */
+	    if(FreqHead->Next) {
+	        nextfreq->Next =  FreqHead->Next;
+	        FreqHead->Next->Prev = nextfreq;
 	    }
-	FreqHead->Next = nextfreq;
-	nextfreq->Prev = FreqHead;
-	InsertNode(listnode, nextfreq);
-        }
-        /* case 3: if Head->next is the frequency 1 node*/
-        else
-	    InsertNode(listnode, FreqHead->Next);
-	    
+	    FreqHead->Next = nextfreq;
+	    nextfreq->Prev = FreqHead;
+	    InsertNode(listnode, nextfreq);
+	    cout<<listnode<<endl;
+    }    
 	/* insert to hash table */
 	LFUHash.insert({frameid, listnode});
-	Free++;
+	Free--;
 	return;
 }
     
@@ -60,35 +63,36 @@ void LFUCache::DeleteNode(){
     else {
     	LFUListNode* listnode = FreqHead->Next->HeadNode;
     	IsolateNode(listnode);
-    	delete(LFUHash[listnode->FrameID]);
+    	//delete(LFUHash[listnode->FrameID]);
     	LFUHash.erase(listnode->FrameID);
     	delete(listnode);  	
-    	Free--;
+    	Free++;
     }
     return;
 }
 
 /* update node to next frequency */
 void LFUCache::UpdateNode(LFUListNode*& listnode) {
-	FreqNode* freqnode = listnode->FreqNodeQ; /* current frequency node */
+    	FreqNode* freqnode = listnode->FreqNodeQ; /* current frequency node */
         int frequency = freqnode->Freq; /* current frequency */
         
-        /* if listnode is the node node in current frequency queue, PrevFreq
+        /* if listnode is the only node in current frequency queue, PrevFreq
         is the previous frequency node, otherwise, is the current one. */
-        FreqNode* prevfreq = IsolateNode(listnode); 
         FreqNode* nextfreq;
 
-        /* case 1, the next FreqNode is null */
-        if(!freqnode->Next) 
-	    nextfreq = new FreqNode(frequency+1);
-
-        /* case 2, the next FreqNode exists, and it is continuous */
-        else if (frequency + 1 == freqnode->Next->Freq) 
+        /* case 1, the next FreqNode exists, and it is continuous */
+        if (freqnode->Next && frequency + 1 == freqnode->Next->Freq) 
 	    nextfreq = freqnode->Next;
-
+	    else {
+        /* case 2, the next FreqNode is null */
 	/* case 3, the next FreqNode exists, and it is not continuous */
-	else
-	    FreqNode* nextfreq = new FreqNode(frequency+1);
+	     nextfreq = new FreqNode(frequency+1);
+	    
+	    nextfreq->Next = listnode->FreqNodeQ->Next;
+	    if(listnode->FreqNodeQ->Next)
+			listnode->FreqNodeQ->Next->Prev = nextfreq;
+		}
+	    FreqNode* prevfreq = IsolateNode(listnode); 
 	    
 	/* connect the frequency node */
 	 prevfreq->Next = nextfreq;
@@ -103,19 +107,20 @@ void LFUCache::UpdateNode(LFUListNode*& listnode) {
 
 /* insert the listnode into frequency queque */
 void LFUCache::InsertNode(LFUListNode*& listnode, FreqNode*& freqnode) {
-    /*case 1: if freqnode queue is empty */
-    if (!freqnode->HeadNode) {
-	freqnode->HeadNode = listnode;
-	listnode->FreqNodeQ = freqnode;
-    }
-    /* case 2: if freqnode queue is not empty, insert listnode at the head */
-    else {
+	/* case 1: if freqnode queue is not empty, insert listnode at the head */
+    if (freqnode->HeadNode) {
 	LFUListNode* head_temp = freqnode->HeadNode;
 	freqnode->HeadNode = listnode;
 	listnode->Next = head_temp;
 	head_temp->Prev = listnode;
 	listnode->FreqNodeQ = freqnode;
     }
+    /*case 2: if freqnode queue is empty */
+    else {
+	freqnode->HeadNode = listnode;
+	listnode->FreqNodeQ = freqnode;
+    }
+   
     return;
 }
 
@@ -135,9 +140,11 @@ FreqNode* LFUCache::IsolateNode(LFUListNode*& listnode) {
 
 	/* connect the frequency list */
 	result->Next = listnode->FreqNodeQ->Next;
-	listnode->FreqNodeQ->Next->Prev = result;
+	if(listnode->FreqNodeQ->Next)
+	    listnode->FreqNodeQ->Next->Prev = result;
+		
 
-	/* delete the list node and frequence node */
+	/* delete the frequence node */
 	delete(listnode->FreqNodeQ);
 	/* clean up the list node */
 	listnode->FreqNodeQ = NULL;
