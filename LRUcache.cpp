@@ -5,8 +5,8 @@ extern vector<vector<int>> DB;
 
 /* when hit the cache, update the position of the node */
 void LRUCache::UpdateNode(LRUListNode*& listnode) {
-    /* this is the only node, or it is the tail */
-	if(!listnode->Next);
+    /* this is the tail */
+	if(listnode == End);
 	/* this is the head node */
 	else if(!listnode->Prev) {
 		Head = listnode->Next;
@@ -20,6 +20,7 @@ void LRUCache::UpdateNode(LRUListNode*& listnode) {
 	    listnode->Prev->Next = listnode->Next;
 	    listnode->Next->Prev = listnode->Prev;
 	    listnode->Next = End->Next;
+	    if(End->Next) End->Next->Prev = listnode;
 	    listnode->Prev = End;
 	    End->Next = listnode;
 	    End = listnode;
@@ -60,13 +61,14 @@ void LRUCache::PutNode(int frameid, int value) {
 	    /* update the hash table */
 	    LRUHash.erase(Head->FrameID);
         Head->Value = value;
+        Head->FrameID = frameid;
 	    /* creat a ring double linked list */
 	    if(!End->Next) {
 	        End->Next = Head;
 	        Head->Prev = End;
 	    }
+	    End = Head;
 	    Head = Head->Next;
-	    End = End->Next;
    }
     
  
@@ -80,13 +82,12 @@ void LRUCache::PutNode(int frameid, int value) {
 		    LRUListNode* listnode = new LRUListNode(frameid, value);
             End->Next = listnode;
             listnode->Prev = End;
-            listnode->Next = NULL;
             End = listnode;
         }
+        Free--;
     }
      
      /* update the hash table */
      LRUHash.insert({frameid, End});
-     Free--;
 	 return;
 }

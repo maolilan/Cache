@@ -15,7 +15,7 @@ void LFUCache::PutNode(int frameid, int value) {
         
     /* case 1: if Head->next is the frequency 1 node*/
     if (FreqHead->Next && FreqHead->Next->Freq == 1) {
-		cout<<listnode<<endl;
+		//cout<<listnode<<endl;
 		InsertNode(listnode, FreqHead->Next);
 	}
 		
@@ -62,7 +62,7 @@ void LFUCache::DeleteNode(){
 	return;
     else {
     	LFUListNode* listnode = FreqHead->Next->HeadNode;
-    	IsolateNode(listnode);
+    	IsolateNode(listnode, listnode->FreqNodeQ->Next);
     	//delete(LFUHash[listnode->FrameID]);
     	LFUHash.erase(listnode->FrameID);
     	delete(listnode);  	
@@ -88,11 +88,11 @@ void LFUCache::UpdateNode(LFUListNode*& listnode) {
 	/* case 3, the next FreqNode exists, and it is not continuous */
 	     nextfreq = new FreqNode(frequency+1);
 	    
-	    nextfreq->Next = listnode->FreqNodeQ->Next;
-	    if(listnode->FreqNodeQ->Next)
-			listnode->FreqNodeQ->Next->Prev = nextfreq;
+	   nextfreq->Next = listnode->FreqNodeQ->Next;
+	   if(listnode->FreqNodeQ->Next)
+		listnode->FreqNodeQ->Next->Prev = nextfreq;
 		}
-	    FreqNode* prevfreq = IsolateNode(listnode); 
+	    FreqNode* prevfreq = IsolateNode(listnode, nextfreq); 
 	    
 	/* connect the frequency node */
 	 prevfreq->Next = nextfreq;
@@ -130,7 +130,7 @@ void LFUCache::InsertNode(LFUListNode*& listnode, FreqNode*& freqnode) {
    return the current frequence node if the queue is not empty,
    otherwise, delete the current frequence node, and return the previous frequence node */
 
-FreqNode* LFUCache::IsolateNode(LFUListNode*& listnode) {
+FreqNode* LFUCache::IsolateNode(LFUListNode*& listnode, FreqNode*& nextfreq) {
 
     FreqNode* result = listnode->FreqNodeQ;
     
@@ -139,9 +139,12 @@ FreqNode* LFUCache::IsolateNode(LFUListNode*& listnode) {
 	result = listnode->FreqNodeQ->Prev;
 
 	/* connect the frequency list */
-	result->Next = listnode->FreqNodeQ->Next;
-	if(listnode->FreqNodeQ->Next)
-	    listnode->FreqNodeQ->Next->Prev = result;
+	//result->Next = listnode->FreqNodeQ->Next;
+	result->Next = nextfreq;
+	//if(listnode->FreqNodeQ->Next)
+	  //  listnode->FreqNodeQ->Next->Prev = result;
+	  if(nextfreq)
+	  nextfreq->Prev = result;
 		
 
 	/* delete the frequence node */

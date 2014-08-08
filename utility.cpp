@@ -61,6 +61,7 @@ void SimulateLFU(int count, int pattern, LFUCache* cache_obj) {
 		        break;
 	        default:
 	            frameid = random()%DBMAX;
+	            break;
 	    }
     }
 

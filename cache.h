@@ -104,6 +104,6 @@ class LFUCache:public Cache {
         void DeleteNode();
         void UpdateNode(LFUListNode*& listnode);
         void InsertNode(LFUListNode*& listnode, FreqNode*& freqnode);
-        FreqNode* IsolateNode(LFUListNode*& listnode);
+        FreqNode* IsolateNode(LFUListNode*& listnode, FreqNode*& nextfreq);
 };
 #endif
