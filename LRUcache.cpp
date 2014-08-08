@@ -6,24 +6,24 @@ extern vector<vector<int>> DB;
 /* when hit the cache, update the position of the node */
 void LRUCache::UpdateNode(LRUListNode*& listnode) {
     /* this is the tail */
-	if(listnode == End);
-	/* this is the head node */
-	else if(!listnode->Prev) {
-		Head = listnode->Next;
-		End->Next = listnode;
-		listnode->Prev = End;
-		listnode->Next = NULL;
-		End = listnode;
+    if(listnode == End);
+    /* this is the head node */
+    else if(!listnode->Prev) {
+	Head = listnode->Next;
+	End->Next = listnode;
+	listnode->Prev = End;
+	listnode->Next = NULL;
+	End = listnode;
     }
     /* this is the middle node */
     else {
-	    listnode->Prev->Next = listnode->Next;
-	    listnode->Next->Prev = listnode->Prev;
-	    listnode->Next = End->Next;
-	    if(End->Next) End->Next->Prev = listnode;
-	    listnode->Prev = End;
-	    End->Next = listnode;
-	    End = listnode;
+	listnode->Prev->Next = listnode->Next;
+	listnode->Next->Prev = listnode->Prev;
+	listnode->Next = End->Next;
+	if(End->Next) End->Next->Prev = listnode;
+	listnode->Prev = End;
+	End->Next = listnode;
+	End = listnode;
     } 
     return;
 }
@@ -31,19 +31,19 @@ void LRUCache::UpdateNode(LRUListNode*& listnode) {
 /* get the value from the existing cache, if hit, return true,
  * if not hit, get the value from DB, and return false */
 bool LRUCache::GetNode(int frameid, int& result) {
-	/* if hit the cache */
+    /* if hit the cache */
     if (LRUHash.find(frameid)!= LRUHash.end()) {
 	/* update the cache */
 	LRUListNode* listnode = LRUHash[frameid];
 	result = LRUHash[frameid]->Value; 
-    UpdateNode(listnode);
+	UpdateNode(listnode);
 	return true;
     }
     else {
-		result = DB[frameid][VALUE];
-		PutNode(frameid, result);
-	    return false;
-	}
+	result = DB[frameid][VALUE];
+	PutNode(frameid, result);
+	return false;
+    }
 }
 
 /* put a new frame
@@ -58,28 +58,27 @@ bool LRUCache::GetNode(int frameid, int& result) {
 void LRUCache::PutNode(int frameid, int value) {
     /* if there is no space */
    if (!Free) {
-	    /* update the hash table */
-	    LRUHash.erase(Head->FrameID);
+	/* update the hash table */
+	LRUHash.erase(Head->FrameID);
         Head->Value = value;
         Head->FrameID = frameid;
 	    /* creat a ring double linked list */
-	    if(!End->Next) {
-	        End->Next = Head;
-	        Head->Prev = End;
-	    }
-	    End = Head;
-	    Head = Head->Next;
+	if(!End->Next) {
+	    End->Next = Head;
+	    Head->Prev = End;
+	}
+	End = Head;
+	Head = Head->Next;
    }
     
- 
     else {
         /* if this is the first element */
         if(!Head) {
-	        Head = new LRUListNode(frameid, value);
-	        End = Head;
+	    Head = new LRUListNode(frameid, value);
+	    End = Head;
         }
         else {
-		    LRUListNode* listnode = new LRUListNode(frameid, value);
+	    LRUListNode* listnode = new LRUListNode(frameid, value);
             End->Next = listnode;
             listnode->Prev = End;
             End = listnode;
@@ -89,5 +88,5 @@ void LRUCache::PutNode(int frameid, int value) {
      
      /* update the hash table */
      LRUHash.insert({frameid, End});
-	 return;
+     return;
 }
