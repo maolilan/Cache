@@ -62,7 +62,7 @@ void LRUCache::PutNode(int frameid, int value) {
 	LRUHash.erase(Head->FrameID);
         Head->Value = value;
         Head->FrameID = frameid;
-	    /* creat a ring double linked list */
+	/* creat a ring double linked list */
 	if(!End->Next) {
 	    End->Next = Head;
 	    Head->Prev = End;
