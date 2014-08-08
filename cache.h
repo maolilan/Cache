@@ -13,7 +13,6 @@ class ListNode {
     public:
         int FrameID;
         int Value;
-
 };
 
 class LRUListNode:public ListNode {
