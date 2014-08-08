@@ -14,28 +14,27 @@ void LFUCache::PutNode(int frameid, int value) {
         DeleteNode();
         
     /* case 1: if Head->next is the frequency 1 node*/
-    if (FreqHead->Next && FreqHead->Next->Freq == 1) {
-		//cout<<listnode<<endl;
-		InsertNode(listnode, FreqHead->Next);
-	}
+    if (FreqHead->Next && FreqHead->Next->Freq == 1) 
+	InsertNode(listnode, FreqHead->Next);
 		
     /* case 2: if Head is null || case 3: if Head->next is not the frequency 1 node*/
     else {
-	    FreqNode* nextfreq = new FreqNode(1);
-	    /* connect frequency node */
-	    if(FreqHead->Next) {
-	        nextfreq->Next =  FreqHead->Next;
-	        FreqHead->Next->Prev = nextfreq;
-	    }
-	    FreqHead->Next = nextfreq;
-	    nextfreq->Prev = FreqHead;
-	    InsertNode(listnode, nextfreq);
-	    cout<<listnode<<endl;
+	FreqNode* nextfreq = new FreqNode(1);
+	/* connect frequency node */
+	if(FreqHead->Next) {
+	    nextfreq->Next =  FreqHead->Next;
+	    FreqHead->Next->Prev = nextfreq;
+	}
+	FreqHead->Next = nextfreq;
+	nextfreq->Prev = FreqHead;
+	InsertNode(listnode, nextfreq);
+	cout<<listnode<<endl;
     }    
-	/* insert to hash table */
-	LFUHash.insert({frameid, listnode});
-	Free--;
-	return;
+	
+    /* insert to hash table */
+    LFUHash.insert({frameid, listnode});
+    Free--;
+    return;
 }
     
 /* get the frame from the existing cache, return NULL if it is missing */
@@ -83,16 +82,15 @@ void LFUCache::UpdateNode(LFUListNode*& listnode) {
         /* case 1, the next FreqNode exists, and it is continuous */
         if (freqnode->Next && frequency + 1 == freqnode->Next->Freq) 
 	    nextfreq = freqnode->Next;
-	    else {
-        /* case 2, the next FreqNode is null */
-	/* case 3, the next FreqNode exists, and it is not continuous */
-	     nextfreq = new FreqNode(frequency+1);
-	    
-	   nextfreq->Next = listnode->FreqNodeQ->Next;
-	   if(listnode->FreqNodeQ->Next)
-		listnode->FreqNodeQ->Next->Prev = nextfreq;
-		}
-	    FreqNode* prevfreq = IsolateNode(listnode, nextfreq); 
+	else {
+            /* case 2, the next FreqNode is null */
+	    /* case 3, the next FreqNode exists, and it is not continuous */
+	    nextfreq = new FreqNode(frequency+1);
+	    nextfreq->Next = listnode->FreqNodeQ->Next;
+	    if(listnode->FreqNodeQ->Next)
+	        listnode->FreqNodeQ->Next->Prev = nextfreq;
+	}
+	FreqNode* prevfreq = IsolateNode(listnode, nextfreq); 
 	    
 	/* connect the frequency node */
 	 prevfreq->Next = nextfreq;
@@ -107,7 +105,7 @@ void LFUCache::UpdateNode(LFUListNode*& listnode) {
 
 /* insert the listnode into frequency queque */
 void LFUCache::InsertNode(LFUListNode*& listnode, FreqNode*& freqnode) {
-	/* case 1: if freqnode queue is not empty, insert listnode at the head */
+    /* case 1: if freqnode queue is not empty, insert listnode at the head */
     if (freqnode->HeadNode) {
 	LFUListNode* head_temp = freqnode->HeadNode;
 	freqnode->HeadNode = listnode;
@@ -142,10 +140,9 @@ FreqNode* LFUCache::IsolateNode(LFUListNode*& listnode, FreqNode*& nextfreq) {
 	//result->Next = listnode->FreqNodeQ->Next;
 	result->Next = nextfreq;
 	//if(listnode->FreqNodeQ->Next)
-	  //  listnode->FreqNodeQ->Next->Prev = result;
-	  if(nextfreq)
-	  nextfreq->Prev = result;
-		
+	//  listnode->FreqNodeQ->Next->Prev = result;
+	if(nextfreq)
+	    nextfreq->Prev = result;
 
 	/* delete the frequence node */
 	delete(listnode->FreqNodeQ);
@@ -157,24 +154,24 @@ FreqNode* LFUCache::IsolateNode(LFUListNode*& listnode, FreqNode*& nextfreq) {
     else {
     	/* listnode is at the end */
 	if(!listnode->Next) {
-		listnode->Prev->Next = NULL;
-		listnode->Prev = NULL;
-		listnode->FreqNodeQ = NULL;
+	    listnode->Prev->Next = NULL;
+	    listnode->Prev = NULL;
+	    listnode->FreqNodeQ = NULL;
 	}
 	/* listnode is at the head */
 	else if (!listnode->Prev){
-		listnode->FreqNodeQ->HeadNode = listnode->Next;
-		listnode->Next->Prev = NULL;
-		listnode->Next = NULL;
-		listnode->FreqNodeQ = NULL;
+	    listnode->FreqNodeQ->HeadNode = listnode->Next;
+	    listnode->Next->Prev = NULL;
+	    listnode->Next = NULL;
+	    listnode->FreqNodeQ = NULL;
 	}
 	/* listnode is in the middle */
 	else{
-		listnode->Prev->Next = listnode->Next;
-		listnode->Next->Prev = listnode->Prev;
-		listnode->Next = NULL;
-		listnode->Prev = NULL;
-		listnode->FreqNodeQ = NULL;
+	    listnode->Prev->Next = listnode->Next;
+	    listnode->Next->Prev = listnode->Prev;
+	    listnode->Next = NULL;
+	    listnode->Prev = NULL;
+	    listnode->FreqNodeQ = NULL;
 	}
     }
     return result;
