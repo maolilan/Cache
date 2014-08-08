@@ -5,6 +5,11 @@ extern vector<vector<int>> DB;
 
 /* when hit the cache, update the position of the node */
 void LRUCache::UpdateNode(LRUListNode*& listnode) {
+    /* Connect Head and Tail to ring if it is full */
+    if(!Free) {
+    	End->Next = Head;
+    	Head->Prev = End;
+    }
     /* this is the tail */
     if(listnode == End);
     /* this is the head node */
